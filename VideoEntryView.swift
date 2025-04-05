@@ -1,91 +1,119 @@
-//
-//  VideoEntryView.swift
-//  reflexion
-//
-//  Created by Michelle Han on 2/17/25.
-//
 
 import SwiftUI
 import AVFoundation
 import Speech
 
-// MARK: - VideoEntryView
 
 struct VideoEntryView: View {
     @StateObject private var captureManager = CaptureSessionManager()
     @StateObject private var speechTranscriber = SpeechTranscriber()
     
-    // For storing the final transcript if needed
     @State private var fullTranscript: String = ""
-    
-    // Track whether we are recording
     @State private var isRecording = false
+    @State private var navigateToReview = false
     
     var body: some View {
-        VStack(spacing: 16) {
-            // Camera Preview
-            VideoPreviewView(session: captureManager.captureSession)
-                .frame(height: 300)
-                .background(Color.black.opacity(0.8))
-            
-            // Live Transcript
+        NavigationStack {
             ScrollView {
-                Text(speechTranscriber.currentTranscription)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(8)
-            }
-            .frame(height: 150)
-            
-            // Record / Stop Button
-            Button(action: {
-                if isRecording {
-                    // Stop
-                    captureManager.stopRecording()
-                    speechTranscriber.stopTranscription()
-                    fullTranscript = speechTranscriber.currentTranscription
-                } else {
-                    // Start
-                    captureManager.startRecording()
-                    speechTranscriber.startTranscription()
+                VStack(spacing: 16) { 
+                    Text("Video Entry")
+                        .font(.title)
+                        .bold()
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.horizontal)
+                    
+                    // Camera Preview
+                    VideoPreviewView(session: captureManager.captureSession)
+                        .frame(height: 500)
+                        .background(Color.white.opacity(1))
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                    
+                    // Live Transcript
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            VStack(alignment: .leading) {
+                                Text(speechTranscriber.currentTranscription)
+                                    .font(.system(size: 22, weight: .medium))
+                                    .foregroundColor(.primary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding()
+                                    .background(Color(.secondarySystemBackground))
+                                    .cornerRadius(8)
+                                    .id("LatestTranscription")
+                            }
+                        }
+                        .frame(height: 120)
+                        .onChange(of: speechTranscriber.currentTranscription) { _ in
+                            withAnimation {
+                                proxy.scrollTo("LatestTranscription", anchor: .bottom)
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                    
+                    // Record / Stop Button
+                    Button(action: {
+                        if isRecording {
+                            captureManager.stopRecording()
+                            speechTranscriber.stopTranscription()
+                            fullTranscript = speechTranscriber.currentTranscription
+                        } else {
+                            captureManager.startRecording()
+                            speechTranscriber.startTranscription()
+                        }
+                        isRecording.toggle()
+                    }) {
+                        Text(isRecording ? "Stop Recording" : "Start Recording")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(isRecording ? Color.red : Color.blue)
+                            .cornerRadius(10)
+                            .padding(.horizontal)
+                    }
+                    
+                    // Review Video Button
+                    if let videoURL = captureManager.recordedVideoURL, !isRecording {
+                        Button(action: { navigateToReview = true }) {
+                            Text("Finished? Review Video")
+                                .bold()
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.green)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                        .padding(.horizontal)
+                        .navigationDestination(isPresented: $navigateToReview) {
+                            VideoReviewView(videoURL: videoURL, transcript: fullTranscript)
+                        }
+                    }
+                    
+                    Spacer(minLength: 60)
                 }
-                isRecording.toggle()
-            }) {
-                Text(isRecording ? "Stop Recording" : "Start Recording")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(isRecording ? Color.red : Color.blue)
-                    .cornerRadius(10)
+                .padding(.horizontal)
+                .padding(.bottom, 50)
             }
-            
-            // If you want to show the final transcript
-            if !fullTranscript.isEmpty && !isRecording {
-                Text("Final Transcript:")
-                    .font(.headline)
-                Text(fullTranscript)
-                    .padding()
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(8)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    EmptyView() 
+                }
             }
-            
-            Spacer()
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarHidden(true) 
+            .onAppear {
+                captureManager.configureSession()
+            }
+            .onDisappear {
+                captureManager.stopRecording()
+                speechTranscriber.stopTranscription()
+            }
         }
-        .padding()
-        .onAppear {
-            captureManager.configureSession()
-        }
-        .onDisappear {
-            captureManager.stopRecording()
-            speechTranscriber.stopTranscription()
-        }
-        .navigationTitle("Video Journal")
     }
 }
-
-// MARK: - VideoPreviewView (Camera Preview in SwiftUI)
 
 struct VideoPreviewView: UIViewRepresentable {
     let session: AVCaptureSession
@@ -100,7 +128,6 @@ struct VideoPreviewView: UIViewRepresentable {
     func updateUIView(_ uiView: PreviewUIView, context: Context) {}
 }
 
-// A simple UIView that hosts an AVCaptureVideoPreviewLayer
 class PreviewUIView: UIView {
     override class var layerClass: AnyClass {
         AVCaptureVideoPreviewLayer.self
@@ -110,56 +137,36 @@ class PreviewUIView: UIView {
     }
 }
 
-// MARK: - CaptureSessionManager (Manages AVCaptureSession + Video Recording)
 
 class CaptureSessionManager: NSObject, ObservableObject {
     let captureSession = AVCaptureSession()
     private var videoOutput = AVCaptureMovieFileOutput()
     
+    @Published var recordedVideoURL: URL? 
+
     override init() {
         super.init()
     }
     
     func configureSession() {
         // Configure camera
-        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera,
-                                                   for: .video,
-                                                   position: .front),
-              let mic = AVCaptureDevice.default(.builtInMicrophone,
-                                                for: .audio,
-                                                position: .unspecified) else {
+        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front),
+              let mic = AVCaptureDevice.default(.builtInMicrophone, for: .audio, position: .unspecified) else {
             print("ERROR: Unable to access camera or microphone.")
             return
         }
         
         do {
             captureSession.beginConfiguration()
-            
-            // Add video input
             let videoInput = try AVCaptureDeviceInput(device: camera)
-            if captureSession.canAddInput(videoInput) {
-                captureSession.addInput(videoInput)
-            }
-            
-            // Add audio input
             let audioInput = try AVCaptureDeviceInput(device: mic)
-            if captureSession.canAddInput(audioInput) {
-                captureSession.addInput(audioInput)
-            }
             
-            // Add movie output
-            if captureSession.canAddOutput(videoOutput) {
-                captureSession.addOutput(videoOutput)
-            }
+            if captureSession.canAddInput(videoInput) { captureSession.addInput(videoInput) }
+            if captureSession.canAddInput(audioInput) { captureSession.addInput(audioInput) }
+            if captureSession.canAddOutput(videoOutput) { captureSession.addOutput(videoOutput) }
             
-            // Set session preset (HD quality, for example)
-            if captureSession.canSetSessionPreset(.high) {
-                captureSession.sessionPreset = .high
-            }
-            
+            captureSession.sessionPreset = .high
             captureSession.commitConfiguration()
-            
-            // Start running the capture session
             captureSession.startRunning()
         } catch {
             print("ERROR setting up capture session: \(error.localizedDescription)")
@@ -167,31 +174,21 @@ class CaptureSessionManager: NSObject, ObservableObject {
     }
     
     func startRecording() {
-        guard !videoOutput.isRecording else { return }
-        
-        // Create a temporary file URL
         let outputPath = NSTemporaryDirectory() + "videoJournal-\(UUID().uuidString).mp4"
         let outputFileURL = URL(fileURLWithPath: outputPath)
-        
         videoOutput.startRecording(to: outputFileURL, recordingDelegate: self)
     }
     
     func stopRecording() {
-        guard videoOutput.isRecording else { return }
         videoOutput.stopRecording()
     }
 }
 
 extension CaptureSessionManager: AVCaptureFileOutputRecordingDelegate {
-    func fileOutput(_ output: AVCaptureFileOutput,
-                    didFinishRecordingTo outputFileURL: URL,
-                    from connections: [AVCaptureConnection],
-                    error: Error?) {
-        if let error = error {
-            print("Recording error: \(error.localizedDescription)")
-        } else {
-            print("Video saved to: \(outputFileURL)")
-            // You could move or save the file to your app’s documents, or store URL in your data model
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        DispatchQueue.main.async {
+            let validPath = outputFileURL.absoluteString.replacingOccurrences(of: "file:/", with: "")
+            self.recordedVideoURL = outputFileURL // ✅ Store recorded video URL
         }
     }
 }

@@ -1,30 +1,51 @@
-//
-//  DrawingEntryView.swift
-//  reflexion
-//
-//  Created by Michelle Han on 2/17/25.
-//
-
 import Foundation
 import SwiftUI
 
-struct DrawingEntryView: View {
+struct ArtSelectionView: View {
     var body: some View {
-        VStack {
-            Text("Drawing Entry View")
-                .font(.title)
-
-            Toggle("High Contrast Mode", isOn: .constant(false))
-                .padding()
-
-            Toggle("Enable Face ID", isOn: .constant(true))
-                .padding()
-        }
+            VStack(spacing: 20) {
+                Text("Create an Art Entry")
+                    .font(.title)
+                    .bold()
+                    .padding(.top, 20)
+                
+                // Upload Art Button
+                NavigationLink(destination: UploadArtView()) {
+                    HStack {
+                        Image(systemName: "photo.fill.on.rectangle.fill")
+                        Text("Upload Artwork")
+                            .bold()
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                }
+                
+                // Draw Art Button
+                NavigationLink(destination: DrawArtView()) {
+                    HStack {
+                        Image(systemName: "pencil.tip.crop.circle")
+                        Text("Draw on Canvas")
+                            .bold()
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                }
+                
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("Art Entry")
     }
 }
 
-struct DrawingEntryView_Previews: PreviewProvider {
+struct ArtSelectionView_Previews: PreviewProvider {
     static var previews: some View {
-        DrawingEntryView()
+        ArtSelectionView()
     }
 }

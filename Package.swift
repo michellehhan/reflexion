@@ -8,19 +8,20 @@ import PackageDescription
 import AppleProductTypes
 
 let package = Package(
-    name: "reflexion",
+    name: "Reflexion",
     platforms: [
         .iOS("16.0")
     ],
     products: [
         .iOSApplication(
-            name: "reflexion",
+            name: "Reflexion",
             targets: ["AppModule"],
             bundleIdentifier: "michellehhan.reflexion",
+            teamIdentifier: "8Q64JA6KCC",
             displayVersion: "1.0",
             bundleVersion: "1",
-            appIcon: .placeholder(icon: .lightningBolt),
-            accentColor: .presetColor(.teal),
+            appIcon: .asset("AppIcon"),
+            accentColor: .presetColor(.indigo),
             supportedDeviceFamilies: [
                 .pad,
                 .phone
@@ -30,6 +31,12 @@ let package = Package(
                 .landscapeRight,
                 .landscapeLeft,
                 .portraitUpsideDown(.when(deviceFamilies: [.pad]))
+            ],
+            capabilities: [
+                .camera(purposeString: "Reflexion uses the camera to record video journals."),
+                .speechRecognition(purposeString: "Reflexion transcribes your speech in real-time to assist in journaling."),
+                .microphone(purposeString: "Reflexion uses the microphone for audio input in video journaling."),
+                .photoLibrary(purposeString: "This app needs access to your photo library to select journal images.")
             ]
         )
     ],

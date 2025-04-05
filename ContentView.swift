@@ -1,68 +1,79 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var selectedTab = 0
-
+    @State private var selectedTab: Int = 0 
+    
     var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeView()
-                .tabItem {
-                    VStack {
-                        Image(systemName: "book.fill")
-                            .font(.system(size: 50, weight: .bold))
-                        Text("Journals")
-                            .font(.system(size: 22, weight: .bold))
-                    }
-                }
-                .tag(0)
+        ZStack {
+     
+            if selectedTab == 0 {
+                Color(hex: "#FAF3F3")
+                    .ignoresSafeArea()
+            }
 
-            NewEntryView()
-                .tabItem {
-                    VStack {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 50, weight: .bold))
-                        Text("New Entry")
-                            .font(.system(size: 22, weight: .bold))
-                    }
+            VStack {
+                Spacer()
+                switch selectedTab {
+                case 0:
+                    HomeView()
+                case 1:
+                    NewEntryView()
+                case 2:
+                    EntryViewerView()
+                case 3:
+                    InsightsView()
+                case 4:
+                    SettingsView()
+                default:
+                    HomeView()
                 }
-                .tag(1)
-
-            EntryViewerView()
-                .tabItem {
-                    VStack {
-                        Image(systemName: "clock.fill")
-                            .font(.system(size: 50, weight: .bold))
-                        Text("Past Entries")
-                            .font(.system(size: 22, weight: .bold))
-                    }
+                Spacer()
+            }
+            
+            // Nav Bar
+            VStack {
+                Spacer()
+                HStack {
+                    CustomNavItem(icon: "book.fill", title: "Journals", tabIndex: 0, selectedTab: $selectedTab)
+                    CustomNavItem(icon: "plus.circle.fill", title: "New Entry", tabIndex: 1, selectedTab: $selectedTab)
+                    CustomNavItem(icon: "clock.fill", title: "Past Entries", tabIndex: 2, selectedTab: $selectedTab)
+                    CustomNavItem(icon: "chart.bar.fill", title: "Insights", tabIndex: 3, selectedTab: $selectedTab)
+                    CustomNavItem(icon: "gearshape.fill", title: "Settings", tabIndex: 4, selectedTab: $selectedTab)
                 }
-                .tag(2)
-
-            InsightsView()
-                .tabItem {
-                    VStack {
-                        Image(systemName: "chart.bar.fill")
-                            .font(.system(size: 50, weight: .bold))
-                        Text("Insights")
-                            .font(.system(size: 22, weight: .bold))
-                    }
-                }
-                .tag(3)
-
-            SettingsView()
-                .tabItem {
-                    VStack {
-                        Image(systemName: "gearshape.fill")
-                            .font(.system(size: 50, weight: .bold))
-                        Text("Settings")
-                            .font(.system(size: 22, weight: .bold))
-                    }
-                }
-                .tag(4)
+                .frame(height: 80) 
+                .padding(.horizontal, 10)
+                .padding(.bottom, -5)
+                .background(Color(hex: "#FCEAFF"))
+                .cornerRadius(20)
+            }
+            .ignoresSafeArea(.keyboard, edges: .bottom) 
         }
-        .background(Color.black.ignoresSafeArea()) // ✅ Black Background
-        .toolbarBackground(Color.black, for: .tabBar) // ✅ Ensures TabView is fully black
-        .accentColor(.blue) // ✅ Highlights selected tab in blue
+        .edgesIgnoringSafeArea(.bottom) 
+    }
+}
+
+struct CustomNavItem: View {
+    let icon: String
+    let title: String
+    let tabIndex: Int
+    @Binding var selectedTab: Int
+    
+    var body: some View {
+        Button(action: {
+            selectedTab = tabIndex 
+        }) {
+            VStack {
+                Image(systemName: icon)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 28, height: 28)
+                    .foregroundColor(selectedTab == tabIndex ? .blue : .gray)
+                Text(title)
+                    .font(.system(size: 14, weight: .bold)) 
+                    .foregroundColor(selectedTab == tabIndex ? .blue : .gray)
+            }
+            .frame(maxWidth: .infinity) 
+        }
     }
 }
 
