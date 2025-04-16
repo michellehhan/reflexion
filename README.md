@@ -1,4 +1,6 @@
-# Reflexion 
+<img src="https://i.imgur.com/LOox06m.png" alt="Reflexion Screenshot" width="100"/>
+
+# Reflexion 🩵
 **A multimodal journaling tool for self-expression in all forms.**  
 
 Reflexion makes self-reflection more accessible by offering **7 input methods**: text, speech, video, handwriting, drawing, uploads, and mood sliders, that integrate **AI-powered mood detection** and **data visualization**. The app helps users recognize emotional patterns, overcome barriers to traditional journaling, and engage with self-expression in a way that best suits their needs.
@@ -41,9 +43,9 @@ The idea grew from personal experience and conversations with friends and family
 
 ## 📬 Contact  
 Created by **Michelle Han**  
-📧 michellehan2007agt@gmail.com  
-🌐 [Portfolio](https://michellehhan.github.io)  
-🔗 [WWDC Scholars Feature](https://www.wwdcscholars.com/s/DCBCA77C-CFEC-4F37-ACA5-B40DA8B1C679/2025)
+📧  michellehan2007agt@gmail.com  
+🌐  [Portfolio](https://michellehhan.github.io)  
+🔗  [WWDC Scholars Feature](https://www.wwdcscholars.com/s/DCBCA77C-CFEC-4F37-ACA5-B40DA8B1C679/2025)
 
 ---
 
