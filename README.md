@@ -1,7 +1,7 @@
 # Reflexion 
-**An accessible journaling app that meets users where they are.**  
+**A multimodal journaling tool for self-expression in all forms.**  
 
-Reflexion makes self-reflection more accessible by offering **7 input methods** — text, speech, video, handwriting, drawing, uploads, and mood sliders — that integrate **AI-powered mood detection** and **data visualization**. The app helps users recognize emotional patterns, overcome barriers to traditional journaling, and engage with self-expression in a way that best suits their needs.
+Reflexion makes self-reflection more accessible by offering **7 input methods**: text, speech, video, handwriting, drawing, uploads, and mood sliders, that integrate **AI-powered mood detection** and **data visualization**. The app helps users recognize emotional patterns, overcome barriers to traditional journaling, and engage with self-expression in a way that best suits their needs.
 
 Reflexion was selected as a **2025 Apple Swift Student Challenge Winner** and is featured on the official WWDC Scholars site:
 
